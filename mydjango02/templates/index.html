@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ko">
+
+  <head>
+    <meta charset="UTF-8"/>
+    <title>Melon List</title>
+    {% comment %} <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css"/> {% endcomment %}
+    <script src="https://cdn.tailwindcss.com"></script> 
+  </head>
+
+  <body>
+    <div class="container mx-auto">
+
+      <h1 class="font-bold text-2xl">Melon List</h1>
+
+      <form action="" method="get" autocomplete="off" class="my-4">
+        <input type="text" name="query" placeholder="검색어 입력" autofocus="autofocus" value="{{query}}" class="w-full p-2 border rounded focus:outline-none focus:ring"/>
+      </form>
+
+      <table class="min-w-full bg-white border border-gray-300 divide-y divide-gray-300"
+        id="song-list-table">
+        <thead>
+          <tr class="text-center">
+            <th class="py-2 px-4 border-b">곡명</th>
+            <th class="py-2 px-4 border-b">가수</th>
+          </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+      </table>
+      
+      {{ song_list_data|json_script:"song-list-json" }}
+      
+      <script>
+        const songList = JSON.parse(document.querySelector("#song-list-json").textContent);
+        
+        songList.forEach(song => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${song['곡명']}</td>
+            <td>${song['가수']}</td>
+          `;
+          document.querySelector("#song-list-table tbody").append(tr);
+
+        });
+      </script>
+    </div>
+
+  </body>
+
+</html>
