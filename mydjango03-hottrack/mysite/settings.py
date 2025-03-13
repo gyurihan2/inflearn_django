@@ -40,6 +40,12 @@ INSTALLED_APPS = [
     "hottrack",
 ]
 
+if DEBUG:
+    INSTALLED_APPS += [
+        "debug_toolbar"
+    ]
+
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -49,6 +55,13 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+if DEBUG:
+    # 요청 처리 시에 미들웨어 중에 가장 먼저 호출
+    # 응답 처리 시에 미들웨어 중에 가장 늦게 호출되도록 세팅
+    MIDDLEWARE = [
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+    ] + MIDDLEWARE
 
 ROOT_URLCONF = "mysite.urls"
 
@@ -122,3 +135,7 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# django-debug-toolbar
+INTERNAL_IPS = ["127.0.0.1"]
+
