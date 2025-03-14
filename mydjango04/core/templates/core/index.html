@@ -1,0 +1,31 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css"/>
+</head>
+<body>
+    <div class="container">
+        <h1>core</h1>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert 
+                    {%if message.level_tag == "debug"%}
+                        alert-secondary
+                    {%elif message.level_tag == "error"%}
+                        alert-danger
+                    {%else%}
+                        alert-{{message.level_tag}}
+                    {%endif%}">
+                    [{{message.level_tag}}]
+                    {{message.message}}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    
+</body>
+</html>
