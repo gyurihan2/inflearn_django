@@ -14,10 +14,20 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
+from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
+from django.views.generic.base import RedirectView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path(route='core/', view=include("core.urls")),
+    path("admin/", admin.site.urls),
+    path(route="core/", view=include("core.urls")),
+    path("hottrack/", include("hottrack.urls")),
+    path("", RedirectView.as_view(url="/hottrack/")),
 ]
+
+if settings.DEBUG:
+    urlpatterns += [
+        path(route="__debug__/", view=include("debug_toolbar.urls")),
+    ]
