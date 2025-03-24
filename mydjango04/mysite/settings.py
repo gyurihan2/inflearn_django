@@ -90,6 +90,7 @@ WSGI_APPLICATION = "mysite.wsgi.application"
 
 DATABASES = {
     "default": {
+        # docker run -d -e POSTGRES_USER=myuser -e POSTGRES_PASSWORD=mypw -e POSTGRES_DB=mydb -p 5432:5432 --name postgres postgres:latest
         "ENGINE": "django.db.backends.postgresql",
         "HOST": "localhost",  # 서버 주소
         "PORT": "5432",  # 서버 포트
