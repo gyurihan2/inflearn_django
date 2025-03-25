@@ -69,7 +69,7 @@ class Song(models.Model):
     
     def get_absolute_url(self) -> str:
         
-        return reverse("song_date_detail", 
+        return reverse("hottrack:song_detail", 
             args=[
                 self.release_date.year,
                 self.release_date.month,
