@@ -1,9 +1,13 @@
 from django.db import models
-
+from django.conf import settings
+from django.utils.text import slugify
 # python .\manage.py startapp blog
 # python .\manage.py makemigrations blog
 # python .\manage.py migrate blog
 # python manage.py shell_plus --print-sql
+
+class Category(models.Model):
+    name = models.CharField(max_length=50)
 
 class PostQuerySet(models.QuerySet):
     
@@ -40,6 +44,9 @@ class Post(models.Model):
         DRAFT = "D", "초안"            # 상수, 값, 레이블
         PUBLISHED = "P", "발행"
 
+    categoty = models.ForeignKey(Category, on_delete=models.CASCADE)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    slug = models.SlugField(max_length=120, allow_unicode=True, )
     title = models.CharField(max_length=100)
     status = models.CharField(
         # 선택지 값 크기에 맞춰 최대 길이를 지정
@@ -63,8 +70,18 @@ class Post(models.Model):
     # Post.object.published()
     # Post.object.search("맛집")
     # Post.object.published().search("맛집")
-    object = PostQuerySet.as_manager()
+    objects = PostQuerySet.as_manager()
+    
 
     def __str__(self):
         # choices 속성을 사용한 필드는 get_필드명_display() 함수를 통해 레이블 조회를 지원합니다.
         return f"{self.title} ({self.get_status_display()})"
+    
+    def slugify(self, force=False):
+        if force or not self.slug:
+            self.slug = slugify(self.title, allow_unicode=True)
+            self.slug = self.slug[:120]
+    
+    def save(self, *args, **kwargs):
+        self.slugify()
+        super().save(*args, **kwargs)

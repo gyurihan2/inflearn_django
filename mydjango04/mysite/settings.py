@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "core",
     "hottrack",
     "blog",
+    "shop",
 ]
 
 MIDDLEWARE = [
