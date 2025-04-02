@@ -1,3 +1,4 @@
+from uuid import uuid4
 from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
@@ -46,7 +47,7 @@ class Post(models.Model):
 
     categoty = models.ForeignKey(Category, on_delete=models.CASCADE)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    slug = models.SlugField(max_length=120, allow_unicode=True, )
+    slug = models.SlugField(max_length=120, allow_unicode=True)
     title = models.CharField(max_length=100)
     status = models.CharField(
         # 선택지 값 크기에 맞춰 최대 길이를 지정
@@ -81,7 +82,14 @@ class Post(models.Model):
         if force or not self.slug:
             self.slug = slugify(self.title, allow_unicode=True)
             self.slug = self.slug[:120]
+            # 제목으로 만든 slug 문자열 뒤에 uuid를 붙여 slug의 유일성을 확보
+            self.slug += "-" + uuid4().hex[:8]
     
     def save(self, *args, **kwargs):
         self.slugify()
         super().save(*args, **kwargs)
+        
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["slug"], name="unique_slug"),
+        ]
