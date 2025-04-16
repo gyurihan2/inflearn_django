@@ -2,6 +2,7 @@ from uuid import uuid4
 from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 from core.model_fields import BooleanYNField, IPv4AddressIntegerField
 # python .\manage.py startapp blog
@@ -95,6 +96,8 @@ class Post(models.Model):
         constraints = [
             models.UniqueConstraint(fields=["slug"], name="unique_slug"),
         ]
+        verbose_name = "포스팅"
+        verbose_name_plural = "포스팅 목록"
         
 class AccessLog(models.Model):
     
@@ -112,3 +115,13 @@ class Article(models.Model):
         default= "N"
     )
     is_public_yn = BooleanYNField(default=False)
+
+class Review(models.Model):
+    message = models.TextField()
+    # 평점의 경우 1-5사이의 범위를 가지고 파이썬 코드 레벨에서 점검이 이루어짐(MinValueValidator, MaxValueValidator)
+    rating = models.SmallIntegerField(
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(5),
+        ]
+    )
