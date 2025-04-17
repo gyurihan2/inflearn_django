@@ -3,12 +3,20 @@ from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models import UniqueConstraint, Q
 
 from core.model_fields import BooleanYNField, IPv4AddressIntegerField
 # python .\manage.py startapp blog
 # python .\manage.py makemigrations blog
 # python .\manage.py migrate blog
 # python manage.py shell_plus --print-sql
+
+class TimestampedModel(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        abstract = True
 
 class Category(models.Model):
     name = models.CharField(max_length=50)
@@ -43,7 +51,7 @@ class PostQuerySet(models.QuerySet):
 #         return super().create(**kwargs)
 
 # Create your models here.
-class Post(models.Model):
+class Post(TimestampedModel):
     class Status(models.TextChoices): # 문자열 선택지
         DRAFT = "D", "초안"            # 상수, 값, 레이블
         PUBLISHED = "P", "발행"
@@ -63,8 +71,9 @@ class Post(models.Model):
     )
     content = models.TextField()
 
-    created_at = models.DateTimeField(auto_now_add=True)  # 최초 생성시각을 자동 저장
-    updated_at = models.DateTimeField(auto_now=True)      # 매 수정시각을 자동 저장
+    # 상속으로 인해 제외
+    # created_at = models.DateTimeField(auto_now_add=True)  # 최초 생성시각을 자동 저장
+    # updated_at = models.DateTimeField(auto_now=True)      # 매 수정시각을 자동 저장
     
     # Post.published.create(title="제목", content="내용")
     # Post.published.get_queryset()
@@ -98,13 +107,17 @@ class Post(models.Model):
         ]
         verbose_name = "포스팅"
         verbose_name_plural = "포스팅 목록"
-        
-class AccessLog(models.Model):
+
+class Comment(TimestampedModel):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    message = models.TextField()
+
+class AccessLog(TimestampedModel):
     
     ip_generic = models.GenericIPAddressField(protocol="IPv4")
     ip_int = IPv4AddressIntegerField()
     
-class Article(models.Model):
+class Article(TimestampedModel):
     title = models.CharField(max_length=100)
     is_public_ch = models.CharField(
         max_length=1,
@@ -116,12 +129,30 @@ class Article(models.Model):
     )
     is_public_yn = BooleanYNField(default=False)
 
-class Review(models.Model):
+class Review(TimestampedModel, models.Model):
     message = models.TextField()
     # 평점의 경우 1-5사이의 범위를 가지고 파이썬 코드 레벨에서 점검이 이루어짐(MinValueValidator, MaxValueValidator)
     rating = models.SmallIntegerField(
-        validators=[
-            MinValueValidator(1),
-            MaxValueValidator(5),
-        ]
+        # validators=[
+        #     MinValueValidator(1),
+        #     MaxValueValidator(5),
+        # ]
     )
+    
+    class Meta:
+        constraints =[
+            models.CheckConstraint(
+                check= Q(rating__gte=1, rating__lte=5),
+                name="blog_review_rating_gte_1_lte_5",
+            )
+        ]
+
+class Tag(models.Model):
+    name = models.CharField(max_length=100)
+    
+    class Meta:
+        ordering = ["name"]
+
+        indexes = [
+            models.Index(fields=["name"])
+        ]
