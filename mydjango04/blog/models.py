@@ -107,6 +107,9 @@ class Post(TimestampedModel):
         ]
         verbose_name = "포스팅"
         verbose_name_plural = "포스팅 목록"
+        permissions = [
+            ("view_premium_post", "프리미엄 컨텐츠를 볼 수 있음"),
+        ]
 
 class Comment(TimestampedModel):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
@@ -146,6 +149,7 @@ class Review(TimestampedModel, models.Model):
                 name="blog_review_rating_gte_1_lte_5",
             )
         ]
+        db_table_comment = "사용자 리뷰와 평점을 저장하는 테이블. 평점(rating)은 1-5 사이의 값으로 제한."
 
 class Tag(models.Model):
     name = models.CharField(max_length=100)
