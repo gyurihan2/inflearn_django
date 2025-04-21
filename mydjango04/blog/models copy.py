@@ -21,9 +21,6 @@ class TimestampedModel(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=50)
-    
-    def __str__(self):
-        return self.name
 
 class PostQuerySet(models.QuerySet):
     
@@ -77,6 +74,18 @@ class Post(TimestampedModel):
     # many2many에서 blank가 false일 경우 생성할때 유효성 검사에서 1개 이상의 Post를 요구하기 때문에 True로 설정하여 
     tag_set = models.ManyToManyField("Tag", blank=True)
 
+    # 상속으로 인해 제외
+    # created_at = models.DateTimeField(auto_now_add=True)  # 최초 생성시각을 자동 저장
+    # updated_at = models.DateTimeField(auto_now=True)      # 매 수정시각을 자동 저장
+    
+    # Post.published.create(title="제목", content="내용")
+    # Post.published.get_queryset()
+    # published = PublishedPostManager()
+    # objects = models.Manager()
+    
+    # Post.object.published()
+    # Post.object.search("맛집")
+    # Post.object.published().search("맛집")
     objects = PostQuerySet.as_manager()
     
 
@@ -106,9 +115,7 @@ class Post(TimestampedModel):
         ]
 
 class Comment(TimestampedModel):
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True)
     message = models.TextField()
 
 class AccessLog(TimestampedModel):
@@ -149,9 +156,6 @@ class Review(TimestampedModel, models.Model):
 
 class Tag(models.Model):
     name = models.CharField(max_length=100)
-    
-    def __str__(self):
-        return self.name
     
     class Meta:
         ordering = ["name"]

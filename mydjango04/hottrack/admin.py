@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from .models import Song
+from .filters import ReleaseDateFilter
 from .utils.melon import get_likes_dict
 # Register your models here.
 
@@ -17,9 +18,23 @@ class SongAdmin(admin.ModelAdmin):
         "like_count"
     ]
     
-    list_filter = ["genre", "release_date"]
+    # list_filter = ["genre", "release_date"]
+    list_filter = ["genre", ReleaseDateFilter]
     
     actions = ["update_like_count"]
+    
+    # song 추가 권한(False: superuser 라도 권한이 없음)
+    # def has_add_permission(self, request):
+    #     return False
+    
+    # def has_change_permission(self, request, obj = None):
+    #     return super().has_change_permission(request, obj)
+    
+    # def has_delete_permission(self, request, obj = None):
+    #     return super().has_delete_permission(request, obj)
+    
+    # def has_view_permission(self, request, obj = None):
+    #     return super().has_view_permission(request, obj)
     
     def update_like_count(self, request, queryset):
         # flat: False(tuple) / Ture(list)
