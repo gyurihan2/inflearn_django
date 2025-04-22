@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 # Create your models here.
 class ZipCode(models.Model):
@@ -13,3 +14,7 @@ class JuniorEmployee(models.Model):
     class Meta:
         managed = False
         db_table = "junior_employee_view"
+
+class Post(models.Model):
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name= "shop_post_set", related_query_name="shop_post")
+    message = models.TextField()
