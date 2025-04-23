@@ -23,5 +23,11 @@ class SuperUser(User):
         super().save(*args, **kwargs)
         
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        User, 
+        on_delete=models.CASCADE,
+        related_name="profile",
+        related_query_name="profile",
+        )
     address = models.CharField(max_length=100, blank=True)
+    point = models.PositiveIntegerField(default=0)

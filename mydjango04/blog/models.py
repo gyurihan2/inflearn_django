@@ -75,7 +75,11 @@ class Post(TimestampedModel):
     )
     content = models.TextField()
     # many2many에서 blank가 false일 경우 생성할때 유효성 검사에서 1개 이상의 Post를 요구하기 때문에 True로 설정하여 
-    tag_set = models.ManyToManyField("Tag", blank=True)
+    tag_set = models.ManyToManyField(
+        "Tag", blank=True,
+        related_name="blog_post_set",
+        related_query_name="blog_post",
+        )
 
     objects = PostQuerySet.as_manager()
     
