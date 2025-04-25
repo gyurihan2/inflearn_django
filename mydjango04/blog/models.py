@@ -79,6 +79,8 @@ class Post(TimestampedModel):
         "Tag", blank=True,
         related_name="blog_post_set",
         related_query_name="blog_post",
+        through="PostTagRelation",
+        through_fields=["post","tag"]
         )
 
     objects = PostQuerySet.as_manager()
@@ -107,6 +109,21 @@ class Post(TimestampedModel):
         verbose_name_plural = "포스팅 목록"
         permissions = [
             ("view_premium_post", "프리미엄 컨텐츠를 볼 수 있음"),
+        ]
+
+class PostTagRelation(models.Model):
+    post = models.ForeignKey("Post", on_delete=models.CASCADE)
+    tag = models.ForeignKey("Tag", on_delete=models.CASCADE)
+    
+    #관계 모델을 통해, 관계에 대한 추가 정보를 담을 수 있다.
+    create_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["post", "tag"],
+                name = "blog_post_tag_relation_unique",
+            )
         ]
 
 class Comment(TimestampedModel):
