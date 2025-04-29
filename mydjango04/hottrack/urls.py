@@ -6,7 +6,7 @@ app_name = "hottrack"
 urlpatterns = [
     path(route="", view=views.index, name="index"),
     path(route="<int:pk>/", view=views.song_detail, name="song_detail"),
-    path(route="melon-<int:melon_uid>/", view=views.song_detail, name="song_detail"),
+    # path(route="melon-<int:melon_uid>/", view=views.song_detail, name="song_detail"), #07_29
     # path(route="archives/<date:release_date>", view=views.index),
     re_path(route=r"^export\.(?P<format>(csv|xlsx))$", view=views.export, name="export"),
     path(route="<int:pk>/cover.png", view=views.cover_png, name="cover_png"),
