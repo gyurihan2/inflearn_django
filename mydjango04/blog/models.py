@@ -1,10 +1,14 @@
 from uuid import uuid4
 from django.db import models
 from django.conf import settings
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from django.utils import timezone
 from django.utils.text import slugify
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models import UniqueConstraint, Q
 from django.db.models.functions import Lower
+from django_lifecycle import hook, BEFORE_UPDATE, LifecycleModelMixin, AFTER_UPDATE
 
 from core.model_fields import BooleanYNField, IPv4AddressIntegerField
 # python .\manage.py startapp blog
@@ -55,12 +59,12 @@ class PostQuerySet(models.QuerySet):
 #         return super().create(**kwargs)
 
 # Create your models here.
-class Post(TimestampedModel):
+class Post(LifecycleModelMixin, models.Model):
     class Status(models.TextChoices): # 문자열 선택지
         DRAFT = "D", "초안"            # 상수, 값, 레이블
         PUBLISHED = "P", "발행"
 
-    categoty = models.ForeignKey(Category, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="blog_post_set")
     slug = models.SlugField(max_length=120, allow_unicode=True)
     title = models.CharField(max_length=100)
@@ -82,6 +86,9 @@ class Post(TimestampedModel):
         through="PostTagRelation",
         through_fields=["post","tag"]
         )
+    
+    created_at = models.DateTimeField(auto_now_add=True) # 최초 생성 시각을 자동으로 저장
+    updated_at = models.DateTimeField(auto_now_add=True) # 최초 생성 시각을 자동으로 저장
 
     objects = PostQuerySet.as_manager()
     
@@ -97,9 +104,19 @@ class Post(TimestampedModel):
             # 제목으로 만든 slug 문자열 뒤에 uuid를 붙여 slug의 유일성을 확보
             self.slug += "-" + uuid4().hex[:8]
     
-    def save(self, *args, **kwargs):
-        self.slugify()
-        super().save(*args, **kwargs)
+    @hook(BEFORE_UPDATE, when="content", has_changed=True)
+    def on_changed_content(self):
+        print("content 필드가 변경되었습니다. update_at을 갱신합니다.")
+        self.updated_at= timezone.now()
+
+    @hook(AFTER_UPDATE, when="status", was=Status.DRAFT, is_now=Status.PUBLISHED)
+    def on_publish(self):
+        print("저자에게 이메일을 보냅니다.")
+    
+    # 장고 시그널로 처리를 위한 주석 처리    
+    # def save(self, *args, **kwargs):
+    #     self.slugify()
+    #     super().save(*args, **kwargs)
         
     class Meta:
         constraints = [
@@ -110,6 +127,14 @@ class Post(TimestampedModel):
         permissions = [
             ("view_premium_post", "프리미엄 컨텐츠를 볼 수 있음"),
         ]
+
+
+
+    
+@receiver(pre_save, sender=Post)
+def pre_save_on_save(sender, instance:Post, **kwargs):
+    print("pre_svae_on_save() 메서드가 호출되었습니다.")
+    instance.slugify()
 
 class PostTagRelation(models.Model):
     post = models.ForeignKey("Post", on_delete=models.CASCADE)

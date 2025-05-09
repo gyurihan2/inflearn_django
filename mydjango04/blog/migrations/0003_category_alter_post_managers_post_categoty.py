@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
         migrations.RunPython(create_initial_category, migrations.RunPython.noop),
         migrations.AddField(
             model_name='post',
-            name='categoty',
+            name='category',
             field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='blog.category'),
             preserve_default=False,
         ),

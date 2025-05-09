@@ -1,8 +1,9 @@
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required, permission_required
+from django.db.models.query import Prefetch
 
-from blog.models import Post
+from blog.models import Post, Comment
 
 # Create your views here.
 @login_required
@@ -22,3 +23,12 @@ def post_premium_detail(request, slug):
 
 def premium_user_guide(request):
     return HttpResponse("프리미엄 유저 가이드 페이지")
+
+def post_list(request):
+    post_qs = Post.objects.all()
+    post_qs = post_qs.select_related("author")
+    prefetch = Prefetch(lookup="comment_set", queryset=Comment.objects.select_related("author"))
+    post_qs = post_qs.prefetch_related("tag_set", prefetch)
+    return render(request=request, 
+                    template_name="blog/post_list.html",
+                    context={"post_list":post_qs},)

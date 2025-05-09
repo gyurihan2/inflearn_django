@@ -17,3 +17,4 @@ django-extensions==3.2.3
 psycopg2-binary==2.9.10
 django-bootstrap5==25.1
 ipython==9.0.2
+django-lifecycle==1.2.4

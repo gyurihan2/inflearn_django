@@ -1,5 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 
 # Create your models here.
 class User(AbstractUser):
@@ -23,6 +25,12 @@ class User(AbstractUser):
         related_name="following_set",
         related_query_name="following",
     )
+
+@receiver(post_save, sender=User)
+def post_save_on_user(sender, instance:User, created: bool, **kwargs):
+    if created:
+        print(f"User({instance})의 프로필을 생성합니다.")
+        Profile.objects.create(user=instance)
 
 class SuperUserManger(models.Manager):
     
@@ -50,3 +58,10 @@ class Profile(models.Model):
         )
     address = models.CharField(max_length=100, blank=True)
     point = models.PositiveIntegerField(default=0)
+    
+    # pillow 라이브러리가 설치 되어있여야함: makemigration 시에 에러 발생
+    photo = models.ImageField(upload_to="profile/photo", blank=True)
+
+@receiver(post_delete, sender=Profile)
+def post_delete_on_profile(sender, instance:Profile, **kwargs):
+    instance.photo.delete(save=False)
