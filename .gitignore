@@ -6,3 +6,4 @@ __pycache__
 /staticfiles
 /mediafiles
 .DS_Store
+/orm_test
